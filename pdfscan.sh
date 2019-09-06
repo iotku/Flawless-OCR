@@ -43,12 +43,10 @@ function genSplitCMDS (){
 
 	SPLITCOUNT=0
 	export OMP_THREAD_LIMIT=1 # Be sure to Only use one thread per tesseract instance
-	# Can Probably parallelize splitting as well.
 	for (( i = 1; i <= "$PAGES"; i += $(expr "$SPLITBY" + 1) ))
 	do
 	SPLITCOUNT=$((SPLITCOUNT+=1))
 	# Convert to tiff (for input to tesseract ocr), because we're merging into the original PDF quality/color doesn't matter much as long as the resolution is appropriate for OCR
-	printf "[gs] Converting to tiff to prepare for scan.\n"
 	if [ $(expr "$i" + "$SPLITBY") -gt $PAGES ]; then
 		ENDPAGE=$PAGES
 	else
@@ -56,8 +54,7 @@ function genSplitCMDS (){
 	fi
 
 	# Consider using a different DEVICE if it may improve OCR (Testing required)
-	SPLITCMDS+=("gs -o "${TMPPREFIX}_${SPLITCOUNT}.tiff" -dFirstPage=${i} -dLastPage=${ENDPAGE} -sDEVICE=tiffgray -sCompression=lzw -r300 '$CROPPDF'") # Find faster method? -r300 is 300 DPI which should be suitable for OCR
-	printf "[gs] done.\n"
+	printf 'gs -o "%s_%s.tiff" -dFirstPage="%s" -dLastPage="%s" -sDEVICE=tiffgray -sCompression=lzw -r300 %q\n' "$TMPPREFIX" "$SPLITCOUNT" "$i" "$ENDPAGE" "$CROPPDF" # Find faster method? -r300 is 300 DPI which should be suitable for OCR
 	done
 }
 
@@ -67,8 +64,7 @@ function main () {
 	CROPPDF="$ORIGPDF"
 	# runCropPDF # Should be run *AFTER* CROPPDF is declared in main because it overwrites variable
 	PAGES=$(pdfinfo "$CROPPDF" | grep Pages | awk '{print $2}')
-	genSplitCMDS
-	printf '%s\n' "${SPLITCMDS[@]}" | sed 's/.*/"&"/' | xargs -I '{}' -P $CPUS bash -c "{}"
+	genSplitCMDS | sed 's/.*/"&"/' | xargs -I '{}' -P $CPUS bash -c '{}'
 
 	# Tesseract pdf generation is NOT lossless and produces artifacts compared to the original PDF
 	# argument -c textonly_pdf=1 would produce image-less pdf (making gs -dFILTERIMAGE irrelevant), but alignment/width seems off
