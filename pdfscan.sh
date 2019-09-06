@@ -41,7 +41,7 @@ function main () {
 	CPUS=$(getconf _NPROCESSORS_ONLN)
 
 	# If expr returns negative value it will return 1 which will kill script
-	PAGES=$(pdfinfo $CROPPDF | grep Pages | awk '{print $2}')
+	PAGES=$(pdfinfo "$CROPPDF" | grep Pages | awk '{print $2}')
 	if [ "$PAGES" -lt "$CPUS" ]; then
 		SPLITBY=1
 	else
