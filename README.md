@@ -9,8 +9,6 @@ It is very robust and not terribly much slower. (and in some senarios may be fas
 - pdfscan.sh [input.pdf] [output.pdf]
 
 # Known Issues
-* pdfcrop is not optional (may turn out fine, but will likely modify margins) https://github.com/iotku/Flawless-OCR/issues/1'
-** It's also really slow!
 * Bookmarks aren't maintained and will probably disappear https://github.com/iotku/Flawless-OCR/issues/2
 * Minor typos in comments are expected and some comments may be out of date 
 
