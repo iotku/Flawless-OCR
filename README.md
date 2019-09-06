@@ -13,12 +13,12 @@ Bash Script intending to provide OCR in a fast mannor without quality loss
 * Minor typos in comments are expected and some comments may be out of date 
 
 # Requirements
-	- ghostscript
-	- tesseract
-	- pdfmerge.py (python3) (by Georg Sauthoff :: https://raw.githubusercontent.com/gsauthof/utility/master/pdfmerge.py)
-	- pdfcrop (from texlive-extra-utils)
-	- pdfinfo
-	- xargs
+- ghostscript
+- tesseract
+- pdfmerge.py (python3) (by Georg Sauthoff :: https://raw.githubusercontent.com/gsauthof/utility/master/pdfmerge.py)
+- pdfcrop (from texlive-extra-utils)
+- pdfinfo
+- xargs
 
 # Why use this script?
 * Runs tesseract OCR in Parallel on all processor threads (Gotta go fast!)
