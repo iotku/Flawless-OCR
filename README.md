@@ -2,7 +2,8 @@
 Bash Script intending to provide OCR in a fast mannor without quality loss
 
 # WARNING: This is a brand new script and a work in progress
-
+    - A well established program that appears to have the same goals (or higher) than this is OCRmyPDF https://github.com/jbarlow83/OCRmyPDF/
+    
 # Usage
 - pdfscan.sh [input.pdf] [output.pdf]
 
