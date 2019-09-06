@@ -3,6 +3,9 @@ Bash Script intending to provide OCR in a fast mannor without quality loss
 
 # WARNING: This is a brand new script and a work in progress
 
+# Usage
+- pdfscan.sh [input.pdf] [output.pdf]
+
 # Known Issues
 * pdfcrop is not optional (may turn out fine, but will likely modify margins) https://github.com/iotku/Flawless-OCR/issues/1'
 ** It's also really slow!
