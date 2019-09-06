@@ -14,7 +14,7 @@ Bash Script intending to provide OCR in a fast mannor without quality loss
 
 # Requirements
 - ghostscript
-- tesseract
+- tesseract-ocr
 - pdfmerge.py (python3) (by Georg Sauthoff :: https://raw.githubusercontent.com/gsauthof/utility/master/pdfmerge.py)
 - pdfcrop (from texlive-extra-utils)
 - pdfinfo
