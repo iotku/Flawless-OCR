@@ -25,4 +25,3 @@ Bash Script intending to provide OCR in a fast mannor without quality loss
 * Runs tesseract OCR in Parallel on all processor threads (Gotta go fast!)
 * All external depdenancies used don't have insane memory requirements (Works well even on Large PDFs, tested with >1000 page PDF)
 * Aims to maintain quality with some workarounds as tesseract damages PDF image quality if run by itself.
-* pdfcrop (soon to be optional) can remove annoying margins as some PDFs have a lot of dead space
