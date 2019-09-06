@@ -95,9 +95,8 @@ function main () {
 	set +f
 	rm "${TMPPREFIX:2}"*
 
-	if [ "$AUTOCROP" -eq "false" ]; then
+	if [ "$AUTOCROP" = "false" ]; then
 		rm "${ORIGPDF::-4}_noimage.pdf"
-		rm "${ORIGPDF::-4}_ocr.pdf"
 	fi
 
 	printf "Final output PDF @ $OUTPDF\n"
