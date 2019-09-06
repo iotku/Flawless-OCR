@@ -42,7 +42,6 @@ function genSplitCMDS (){
 	fi
 
 	SPLITCOUNT=0
-	export OMP_THREAD_LIMIT=1 # Be sure to Only use one thread per tesseract instance
 	for (( i = 1; i <= "$PAGES"; i += $(expr "$SPLITBY" + 1) ))
 	do
 	SPLITCOUNT=$((SPLITCOUNT+=1))
@@ -70,6 +69,7 @@ function main () {
 	# argument -c textonly_pdf=1 would produce image-less pdf (making gs -dFILTERIMAGE irrelevant), but alignment/width seems off
 	# Thus we will strip images later before merging into a pdf
 	printf "[tesseract] Starting OCR\n"
+	export OMP_THREAD_LIMIT=1 # Be sure to Only use one thread per tesseract instance
 	find . -wholename "${TMPPREFIX}*.tiff" | sed 's/.*/"&"/' | xargs -I '{}' -P $CPUS bash -c "tesseract "{}" "{}" pdf"
 	printf "[tesseract] Finished OCR\n"
 
