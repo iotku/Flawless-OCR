@@ -33,7 +33,6 @@ function runCropPDF () {
 	CROPPDF="${TMPPREFIX}.pdf"
 }
 
-SPLITCOUNT=0
 function genSplitCMDS (){
     # If expr returns negative value it will return 1 which will kill script
 	if [ "$PAGES" -lt "$CPUS" ]; then
@@ -42,6 +41,7 @@ function genSplitCMDS (){
 		SPLITBY=$(expr "$PAGES" / "$CPUS")
 	fi
 
+	SPLITCOUNT=0
 	for (( i = 1; i <= "$PAGES"; i += $(expr "$SPLITBY" + 1) ))
 	do
 	SPLITCOUNT=$((SPLITCOUNT+=1))
@@ -61,8 +61,10 @@ function main () {
 	TMPPREFIX=$(mktemp --suffix=pdfscan -p .) # Dry run should produce name without creating redundant file, but man page calls it unsafe for whatever reason...
 	CPUS=$(getconf _NPROCESSORS_ONLN)
 	CROPPDF="$ORIGPDF"
+
 	# runCropPDF # Should be run *AFTER* CROPPDF is declared in main because it overwrites variable
 	PAGES=$(pdfinfo "$CROPPDF" | grep Pages | awk '{print $2}')
+
 	genSplitCMDS | sed 's/.*/"&"/' | xargs -I '{}' -P $CPUS bash -c '{}'
 
 	# Tesseract pdf generation is NOT lossless and produces artifacts compared to the original PDF
@@ -73,16 +75,9 @@ function main () {
 	find . -wholename "${TMPPREFIX}*.tiff" | sed 's/.*/"&"/' | xargs -I '{}' -P $CPUS bash -c "tesseract "{}" "{}" pdf"
 	printf "[tesseract] Finished OCR\n"
 
-	TIFFLIST=""
-	for (( i = 1; i <= $SPLITCOUNT; i += 1))
-	do
-		TIFFLIST="$TIFFLIST ${TMPPREFIX}_${i}.tiff.pdf"
-	done
-
 	printf "Combining and stripping images\n"
-	OCRFILE="${TMPPREFIX}_noocr.pdf"
 	# Because textonly_pdf=1 only works on current versions (4.0+ of tesseract) and currently alignment/width seems incorrect (Tested with 5.0 alpha) remove all images from PDF so they don't get merged into final pdf
-	gs -dNOPAUSE -sDEVICE=pdfwrite -dFILTERIMAGE -sOUTPUTFILE="${CROPPDF::-4}_noimage.pdf" -dBATCH $TIFFLIST
+	gs -dNOPAUSE -sDEVICE=pdfwrite -dFILTERIMAGE -sOUTPUTFILE="${CROPPDF::-4}_noimage.pdf" -dBATCH $(find -wholename "${TMPPREFIX}_*.tiff.pdf" | sort -V)
 
 	# Merge text-only pdf and image pdf into one file
 	printf "[pdfmerge.py] Merging OCR'd text and Original PDF into final PDF\n"
