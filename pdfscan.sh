@@ -23,15 +23,20 @@ function showHelp () {
 	printf "\n\t--autocrop"
 }
 
-function main () {
-	TMPPREFIX=$(mktemp --suffix=pdfscan -p .) # Dry run should produce name without creating redundant file, but man page calls it unsafe for whatever reason...
+AUTOCROP="false"
+function runCropPDF () {
 	# Crop to A4 with 20 (pixels?) margins
 	# Requires: texlive-extra-utils
 	printf "[pdfcrop] start\n"
 	pdfcrop --verbose --papersize a4 --margins "20 20 20 20" "$ORIGPDF" "${TMPPREFIX}.pdf"
 	printf "[pdfcrop] done.\n"
-
 	CROPPDF="${TMPPREFIX}.pdf"
+}
+
+function main () {
+	TMPPREFIX=$(mktemp --suffix=pdfscan -p .) # Dry run should produce name without creating redundant file, but man page calls it unsafe for whatever reason...
+
+	CROPPDF="$ORIGPDF"
 
 	CPUS=$(getconf _NPROCESSORS_ONLN)
 
@@ -89,6 +94,11 @@ function main () {
 	# Enable Globing for cleanup
 	set +f
 	rm "${TMPPREFIX:2}"*
+
+	if [ "$AUTOCROP" -eq "false" ]; then
+		rm "${ORIGPDF::-4}_noimage.pdf"
+		rm "${ORIGPDF::-4}_ocr.pdf"
+	fi
 
 	printf "Final output PDF @ $OUTPDF\n"
 }
