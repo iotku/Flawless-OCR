@@ -32,7 +32,6 @@ else
 fi
 
 SPLITCOUNT=0
-echo fired
 export OMP_THREAD_LIMIT=1 # Be sure to Only use one thread per tesseract instance
 # Can Probably parallelize splitting as well.
 for (( i = 1; i <= "$PAGES"; i += $(expr "$SPLITBY" + 1) ))
@@ -46,12 +45,13 @@ else
 	ENDPAGE=$(expr "$i" + "$SPLITBY")
 fi
 
+# Consider using a different DEVICE if it may improve OCR (Testing required)
 gs -o "${TMPPREFIX}_${SPLITCOUNT}.tiff" -dFirstPage=${i} -dLastPage=${ENDPAGE} -sDEVICE=tiffgray -sCompression=lzw -r300 "$CROPPDF" # Find faster method? -r300 is 300 DPI which should be suitable for OCR
 echo "[gs] done."
 done
 
 # Tesseract pdf generation is NOT lossless and produces artifacts compared to the original PDF
-# argument -c textonly_pdf=1 would produce image-less pdf (making second gs invocation irrelevant), but alignment/width seems off
+# argument -c textonly_pdf=1 would produce image-less pdf (making gs -dFILTERIMAGE irrelevant), but alignment/width seems off
 # Thus we will strip images later before merging into a pdf
 echo "[tesseract] Starting OCR"
 find . -wholename "${TMPPREFIX}*.tiff" | sed 's/.*/"&"/' | xargs -I '{}' -P $CPUS bash -c "tesseract "{}" "{}" pdf"
@@ -63,14 +63,10 @@ do
 	TIFFLIST="$TIFFLIST ${TMPPREFIX}_${i}.tiff.pdf"
 done
 
-echo "Recombing and stripping images"
+echo "Combining and stripping images"
 OCRFILE="${TMPPREFIX}_noocr.pdf"
-gs -dNOPAUSE -sDEVICE=pdfwrite -dFILTERIMAGE -sOUTPUTFILE="${CROPPDF::-4}_noimage.pdf" -dBATCH $TIFFLIST
-
 # Because textonly_pdf=1 only works on current versions (4.0+ of tesseract) and currently alignment/width seems incorrect (Tested with 5.0 alpha) remove all images from PDF so they don't get merged into final pdf
-echo "[gs] stripping images from OCR'd PDF"
-#gs -dNOPAUSE -dBATCH -o "${CROPPDF::-4}_noimage.pdf" -sDEVICE=pdfwrite -dFILTERIMAGE "$OCRFILE"
-echo "[gs] Done stripping images."
+gs -dNOPAUSE -sDEVICE=pdfwrite -dFILTERIMAGE -sOUTPUTFILE="${CROPPDF::-4}_noimage.pdf" -dBATCH $TIFFLIST
 
 # Merge text-only pdf and image pdf into one file
 echo "[pdfmerge.py] Merging OCR'd text and Original PDF into final PDF"
