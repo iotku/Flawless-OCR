@@ -32,7 +32,8 @@ function runCropPDF () {
 	printf "[pdfcrop] done.\n"
 	CROPPDF="${TMPPREFIX}.pdf"
 }
-SPLITCMDS=()
+
+SPLITCOUNT=0
 function genSplitCMDS (){
     # If expr returns negative value it will return 1 which will kill script
 	if [ "$PAGES" -lt "$CPUS" ]; then
@@ -41,7 +42,6 @@ function genSplitCMDS (){
 		SPLITBY=$(expr "$PAGES" / "$CPUS")
 	fi
 
-	SPLITCOUNT=0
 	for (( i = 1; i <= "$PAGES"; i += $(expr "$SPLITBY" + 1) ))
 	do
 	SPLITCOUNT=$((SPLITCOUNT+=1))
