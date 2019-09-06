@@ -32,16 +32,9 @@ function runCropPDF () {
 	printf "[pdfcrop] done.\n"
 	CROPPDF="${TMPPREFIX}.pdf"
 }
-
-function main () {
-	TMPPREFIX=$(mktemp --suffix=pdfscan -p .) # Dry run should produce name without creating redundant file, but man page calls it unsafe for whatever reason...
-
-	CROPPDF="$ORIGPDF"
-
-	CPUS=$(getconf _NPROCESSORS_ONLN)
-
-	# If expr returns negative value it will return 1 which will kill script
-	PAGES=$(pdfinfo "$CROPPDF" | grep Pages | awk '{print $2}')
+SPLITCMDS=()
+function genSplitCMDS (){
+    # If expr returns negative value it will return 1 which will kill script
 	if [ "$PAGES" -lt "$CPUS" ]; then
 		SPLITBY=1
 	else
@@ -63,9 +56,19 @@ function main () {
 	fi
 
 	# Consider using a different DEVICE if it may improve OCR (Testing required)
-	gs -o "${TMPPREFIX}_${SPLITCOUNT}.tiff" -dFirstPage=${i} -dLastPage=${ENDPAGE} -sDEVICE=tiffgray -sCompression=lzw -r300 "$CROPPDF" # Find faster method? -r300 is 300 DPI which should be suitable for OCR
+	SPLITCMDS+=("gs -o "${TMPPREFIX}_${SPLITCOUNT}.tiff" -dFirstPage=${i} -dLastPage=${ENDPAGE} -sDEVICE=tiffgray -sCompression=lzw -r300 '$CROPPDF'") # Find faster method? -r300 is 300 DPI which should be suitable for OCR
 	printf "[gs] done.\n"
 	done
+}
+
+function main () {
+	TMPPREFIX=$(mktemp --suffix=pdfscan -p .) # Dry run should produce name without creating redundant file, but man page calls it unsafe for whatever reason...
+	CPUS=$(getconf _NPROCESSORS_ONLN)
+	CROPPDF="$ORIGPDF"
+	# runCropPDF # Should be run *AFTER* CROPPDF is declared in main because it overwrites variable
+	PAGES=$(pdfinfo "$CROPPDF" | grep Pages | awk '{print $2}')
+	genSplitCMDS
+	printf '%s\n' "${SPLITCMDS[@]}" | sed 's/.*/"&"/' | xargs -I '{}' -P $CPUS bash -c "{}"
 
 	# Tesseract pdf generation is NOT lossless and produces artifacts compared to the original PDF
 	# argument -c textonly_pdf=1 would produce image-less pdf (making gs -dFILTERIMAGE irrelevant), but alignment/width seems off
