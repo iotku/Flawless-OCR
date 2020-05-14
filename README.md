@@ -1,8 +1,9 @@
 # Flawless-OCR
-Bash Script intending to provide OCR in a fast mannor without quality loss
+A minimal Bash script intending to provide OCR in a fast mannor without quality loss
 
-# WARNING: This is a brand new script and a work in progress
-A well established program that appears to have the same goals (or higher) than this is OCRmyPDF https://github.com/jbarlow83/OCRmyPDF/
+This script doesn't perform many advanced functions and is for a pretty specific use case.
+
+A well established program that I recommend if you're looking for simular software is OCRmyPDF https://github.com/jbarlow83/OCRmyPDF/
 It is very robust and not terribly much slower. (and in some senarios may be faster while producing lower filesizes)
     
 # Usage
