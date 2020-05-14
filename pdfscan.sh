@@ -6,6 +6,7 @@ VERSION=0.1.0
 # Requirements
 #	- ghostscript
 #	- tesseract-ocr
+#       - PyPDF2 (python module)
 #	- pdfmerge.py (by Georg Sauthoff :: https://raw.githubusercontent.com/gsauthof/utility/master/pdfmerge.py )
 # 	- pdfcrop (from texlive-extra-utils)
 #	- pdfinfo
@@ -63,7 +64,7 @@ function main () {
 	CROPPDF="$ORIGPDF"
 
 	# runCropPDF # Should be run *AFTER* CROPPDF is declared in main because it overwrites variable
-	PAGES=$(pdfinfo "$CROPPDF" | grep Pages | awk '{print $2}')
+	PAGES=$(pdfinfo "$CROPPDF" | grep -a Pages | awk '{print $2}')
 
 	genSplitCMDS | sed 's/.*/"&"/' | xargs -I '{}' -P $CPUS bash -c '{}'
 
